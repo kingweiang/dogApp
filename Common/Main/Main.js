@@ -62,7 +62,7 @@ var Main = React.createClass({
                     }}
                     renderScene={(route,navigator)=>{
                         let Component = route.component;
-                        return <Component {...route.passProps} navigator={navigator} />;
+                        return <Component {...route.params} navigator={navigator} />; //passProps改为params 才能将前一页的参数代入下一页
                     }}
                 />
             </TabNavigator.Item>

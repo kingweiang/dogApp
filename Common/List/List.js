@@ -24,6 +24,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 // var Mock = require('mockjs')
 var requset = require('../Main/request')
 var config= require('../Main/config')
+var Detail=require('./Detail')
 var width = Dimensions.get('window').width
 
 var cachedResults ={
@@ -31,6 +32,9 @@ var cachedResults ={
     items:[],
     total:0
 }
+/**
+ * Item 组件
+ */
 var Item=React.createClass({
     getInitialState(){
         var row = this.props.row
@@ -71,7 +75,7 @@ var Item=React.createClass({
     render(){
         var row = this.state.row
         return(
-            <TouchableOpacity>
+            <TouchableOpacity onPress={this.props.onSelect}>
                 <View style={styles.item}>
                     <Text style={styles.title}>{row.title}</Text>
                     <Image
@@ -109,6 +113,9 @@ var Item=React.createClass({
     }
 })
 
+/**
+ * list组件
+ */
 var List=React.createClass({
     getInitialState(){
         var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
@@ -118,9 +125,12 @@ var List=React.createClass({
             dataSource: ds.cloneWithRows([]),  //当渲染的是空数组，listView需要定义enableEmptySections
         };
     },
-
+    // row 详情显示
     _renderRow(row){
-        return <Item row={row}/>
+        return <Item
+            key={row._id}
+            onSelect={()=>this._loadPage(row)}
+            row={row}/>
     },
     // 组件安装完毕后调取数据
     componentDidMount(){
@@ -240,6 +250,18 @@ var List=React.createClass({
         return <ActivityIndicator
             style={[styles.loadingMore, {height: 80}]}
         />
+    },
+    /**
+     * 调用Detail页,将数据带入Detail页
+     */
+    _loadPage(row){
+      this.props.navigator.push({
+          name:'detail',
+          component:Detail,
+          params:{
+              row:row
+          }
+      })
     },
 
     render() {
