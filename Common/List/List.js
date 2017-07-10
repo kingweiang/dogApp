@@ -14,7 +14,9 @@ import {
     ListView,
     TouchableOpacity,
     Image,
-    Dimensions
+    Dimensions,
+    ActivityIndicator,
+    RefreshControl
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 // var Mock = require('mockjs')
@@ -22,55 +24,23 @@ var requset = require('../Main/request')
 var config= require('../Main/config')
 var width = Dimensions.get('window').width
 
+var cachedResults ={
+    nextPage:1,
+    items:[],
+    total:0
+}
+
 var List=React.createClass({
     getInitialState(){
         var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
         return {
-            dataSource: ds.cloneWithRows([
-                {
-                    "_id":"410000199304119439","thumb":"http://dummyimage.com/480/0a53ab)","title":"@cparagraph(1, 3)","video":"'http://alicdn.ku6.com/v145/9/58/ab67b274f3edb66f45f07c383a5e2226-f4v-h264-aac-251-32-281334.0-10148555-1388158506769-2b10b0f32e98ed4243641f424085ec2d-1-00-00-00.f4v.mp4?auth_key=1496920863-0-0-5176b9010b3a2ab1584962f94ad4c1c9&start=0'"
-                }
-                ,
-                {
-                    "_id":"420000201209225884","thumb":"http://dummyimage.com/480/f2d396)","title":"@cparagraph(1, 3)","video":"'http://alicdn.ku6.com/v145/9/58/ab67b274f3edb66f45f07c383a5e2226-f4v-h264-aac-251-32-281334.0-10148555-1388158506769-2b10b0f32e98ed4243641f424085ec2d-1-00-00-00.f4v.mp4?auth_key=1496920863-0-0-5176b9010b3a2ab1584962f94ad4c1c9&start=0'"
-                }
-                ,
-                {
-                    "_id":"530000200405251888","thumb":"http://dummyimage.com/480/aaab3c)","title":"@cparagraph(1, 3)","video":"'http://alicdn.ku6.com/v145/9/58/ab67b274f3edb66f45f07c383a5e2226-f4v-h264-aac-251-32-281334.0-10148555-1388158506769-2b10b0f32e98ed4243641f424085ec2d-1-00-00-00.f4v.mp4?auth_key=1496920863-0-0-5176b9010b3a2ab1584962f94ad4c1c9&start=0'"
-                }
-                ,
-                {
-                    "_id":"810000200805206354","thumb":"http://dummyimage.com/480/72de62)","title":"@cparagraph(1, 3)","video":"'http://alicdn.ku6.com/v145/9/58/ab67b274f3edb66f45f07c383a5e2226-f4v-h264-aac-251-32-281334.0-10148555-1388158506769-2b10b0f32e98ed4243641f424085ec2d-1-00-00-00.f4v.mp4?auth_key=1496920863-0-0-5176b9010b3a2ab1584962f94ad4c1c9&start=0'"
-                }
-                ,
-                {
-                    "_id":"460000200802134847","thumb":"http://dummyimage.com/480/406f36)","title":"@cparagraph(1, 3)","video":"'http://alicdn.ku6.com/v145/9/58/ab67b274f3edb66f45f07c383a5e2226-f4v-h264-aac-251-32-281334.0-10148555-1388158506769-2b10b0f32e98ed4243641f424085ec2d-1-00-00-00.f4v.mp4?auth_key=1496920863-0-0-5176b9010b3a2ab1584962f94ad4c1c9&start=0'"
-                }
-                ,
-                {
-                    "_id":"650000199704273624","thumb":"http://dummyimage.com/480/744fe8)","title":"@cparagraph(1, 3)","video":"'http://alicdn.ku6.com/v145/9/58/ab67b274f3edb66f45f07c383a5e2226-f4v-h264-aac-251-32-281334.0-10148555-1388158506769-2b10b0f32e98ed4243641f424085ec2d-1-00-00-00.f4v.mp4?auth_key=1496920863-0-0-5176b9010b3a2ab1584962f94ad4c1c9&start=0'"
-                }
-                ,
-                {
-                    "_id":"50000020070705733X","thumb":"http://dummyimage.com/480/b0b92f)","title":"@cparagraph(1, 3)","video":"'http://alicdn.ku6.com/v145/9/58/ab67b274f3edb66f45f07c383a5e2226-f4v-h264-aac-251-32-281334.0-10148555-1388158506769-2b10b0f32e98ed4243641f424085ec2d-1-00-00-00.f4v.mp4?auth_key=1496920863-0-0-5176b9010b3a2ab1584962f94ad4c1c9&start=0'"
-                }
-                ,
-                {
-                    "_id":"360000197206201363","thumb":"http://dummyimage.com/480/d39fa9)","title":"@cparagraph(1, 3)","video":"'http://alicdn.ku6.com/v145/9/58/ab67b274f3edb66f45f07c383a5e2226-f4v-h264-aac-251-32-281334.0-10148555-1388158506769-2b10b0f32e98ed4243641f424085ec2d-1-00-00-00.f4v.mp4?auth_key=1496920863-0-0-5176b9010b3a2ab1584962f94ad4c1c9&start=0'"
-                }
-                ,
-                {
-                    "_id":"620000198808214426","thumb":"http://dummyimage.com/480/8202e3)","title":"@cparagraph(1, 3)","video":"'http://alicdn.ku6.com/v145/9/58/ab67b274f3edb66f45f07c383a5e2226-f4v-h264-aac-251-32-281334.0-10148555-1388158506769-2b10b0f32e98ed4243641f424085ec2d-1-00-00-00.f4v.mp4?auth_key=1496920863-0-0-5176b9010b3a2ab1584962f94ad4c1c9&start=0'"
-                }
-                ,
-                {
-                    "_id":"620000197504011561","thumb":"http://dummyimage.com/480/3f8e85)","title":"@cparagraph(1, 3)","video":"'http://alicdn.ku6.com/v145/9/58/ab67b274f3edb66f45f07c383a5e2226-f4v-h264-aac-251-32-281334.0-10148555-1388158506769-2b10b0f32e98ed4243641f424085ec2d-1-00-00-00.f4v.mp4?auth_key=1496920863-0-0-5176b9010b3a2ab1584962f94ad4c1c9&start=0'"
-                }
-            ]),  //当渲染的是空数组，listView需要定义enableEmptySections
+            isRefreshing:false,
+            isLoadingTail:false,
+            dataSource: ds.cloneWithRows([]),  //当渲染的是空数组，listView需要定义enableEmptySections
         };
     },
 
-    renderRow(row){
+    _renderRow(row){
         return(
             <TouchableOpacity>
                 <View style={styles.item}>
@@ -109,19 +79,65 @@ var List=React.createClass({
     },
     // 组件安装完毕后调取数据
     componentDidMount(){
-        this._fetchData();
+        this._fetchData(1);
     },
 
-    _fetchData() {
-        requset.get(config.header.api.base + config.header.api.creations,{accessToken:'abcdef'})
+    _fetchData(page) {
+        var that = this
+
+        if(page !== 0){
+            this.setState({
+                isLoadingTail:true
+            })
+        }else {
+            this.setState({
+                isRefreshing:true
+            })
+        }
+
+        requset.get(config.header.api.base + config.header.api.creations,{
+            accessToken:'abcdef',
+            page:page
+        })
             .then((data) => {
                 if(data.success){
-                    this.setState({
-                        dataSource:this.state.dataSource.cloneWithRows(data.data)
-                    })
+                    var items = cachedResults.items.slice()
+
+                    if(page !==0){
+                        items = items.concat(data.data)
+                        cachedResults.nextPage += 1
+                    }else {
+                        items = data.data.concat(items)
+                    }
+
+                    cachedResults.items =items
+                    cachedResults.total=data.total
+
+                    setTimeout(function () {
+                        if(page !==0) {
+                            that.setState({
+                                isLoadingTail: false,
+                                dataSource: that.state.dataSource.cloneWithRows(cachedResults.items)
+                            })
+                        }else {
+                            that.setState({
+                                isRefreshing: false,
+                                dataSource: that.state.dataSource.cloneWithRows(cachedResults.items)
+                            })
+                        }
+                    },100)
                 }
             })
             .catch((error) => {
+                if(page !==0) {
+                    that.setState({
+                        isLoadingTail: false,
+                    })
+                }else {
+                    that.setState({
+                        isRefreshing: false,
+                    })
+                }
                 console.error(error);
             });
     },
@@ -144,6 +160,43 @@ var List=React.createClass({
     //             console.error(error);
     //         });
     // },
+
+    _hasMore(){
+        return cachedResults.items.length !== cachedResults.total
+    },
+
+    _fetchMoreData(){
+        if(!this._hasMore()|| this.state.isLoadingTail){
+            return
+        }
+        var page = cachedResults.nextPage
+        this._fetchData(page)
+    },
+
+    _onRefresh(){
+        if(!this._hasMore() || this.state.isRefreshing){
+            return
+        }
+
+        this._fetchData(0)
+    },
+
+    _renderFooter(){
+        if(!this._hasMore() && cachedResults.total !==0){
+            return (
+                <View style={styles.loadingMore}>
+                    <Text style={styles.loadingText}>别扯了，已经到底了。。。</Text>
+                </View>
+            )
+        }
+        if(!this.state.isLoadingTail){
+            return <View style={styles.loadingMore}/>
+        }
+        return <ActivityIndicator
+            style={[styles.loadingMore, {height: 80}]}
+        />
+    },
+
     render() {
         return (
             <View style={styles.container}>
@@ -152,8 +205,23 @@ var List=React.createClass({
                 </View>
                 <ListView
                     dataSource={this.state.dataSource}
-                    renderRow={this.renderRow}
+                    renderRow={this._renderRow}
+                    renderFooter={this._renderFooter}
+                    onEndReached={this._fetchMoreData}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={this.state.isRefreshing}    // 正在刷新
+                            onRefresh={this._onRefresh}  //  回调
+                            tintColor="#ff6600"
+                            title="拼命加载中。。。"
+                            titleColor="#00ff00"
+                            colors={['#ff0000', '#00ff00', '#0000ff']}
+                            progressBackgroundColor="#ffff00"
+                        />
+                    }
+                    onEndReachedThreshold={20}
                     enableEmptySections={true}
+                    showsVerticalScrollIndicator={false}  //   隐藏滚动条
                     automaticallyAdjustContentInsets={false}
                 />
             </View>
@@ -226,6 +294,13 @@ const styles = StyleSheet.create({
     up:{
         fontSize:22,
         color:'#333'
+    },
+    loadingMore:{
+        marginVertical:20
+    },
+    loadingText:{
+        color:'#777',
+        textAlign:'center'
     }
 });
 
