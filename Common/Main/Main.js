@@ -20,41 +20,25 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import FontAwesome  from 'react-native-vector-icons/FontAwesome';
 import {Navigator} from 'react-native-deprecated-custom-components';
 
-var Home = require('../Home/Home');
-// var Shop = require('../Shop/XMGShop');
-// var More = require('../More/XMGMore');
-// var Mine = require('../Mine/XMGMine');
+var Edit = require('../Edit/Edit');
+var List =require('../List/List');
+var Account= require('../Account/Account');
 
-// var Mock = require('Mock')
 
 var Main = React.createClass({
     getInitialState(){
         return{
-            selectedTab:'home'
+            selectedTab:'videocam'
         }
     },
-    componentDidMount(){
-        this._fetchData();
-    },
 
-    _fetchData() {
-        fetch('http://rapapi.org/mockjs/20376/api/creactions?accessToken=abcdef')
-            .then((response) => response.text())
-            .then((responseText) => {
-                var resp =JSON.parse(responseText.replace(/\\'/g,''))
-                // var data= Mock.mock(resp)
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    },
+
     render: function() {
         return (
             <TabNavigator>
-                {this.renderTabBarItem('首页','ios-home-outline','ios-home','home',Home,'首页')}
-                {this.renderTabBarItem('视频','ios-videocam-outline','ios-videocam','videocam',Home,'首页')}
-                {this.renderTabBarItem('记录','ios-recording-outline','ios-recording','recording',Home,'首页')}
-                {this.renderTabBarItem('更多','ios-more-outline','ios-more','more',Home,'首页')}
+                {this.renderTabBarItem('视频','ios-videocam-outline','ios-videocam','videocam',List,'列表页面')}
+                {this.renderTabBarItem('记录','ios-recording-outline','ios-recording','recording',Edit,'编辑页面')}
+                {this.renderTabBarItem('更多','ios-more-outline','ios-more','more',Account,'账户页面')}
             </TabNavigator>
         );
     },

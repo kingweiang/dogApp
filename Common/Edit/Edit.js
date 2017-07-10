@@ -12,12 +12,12 @@ import {
     View
 } from 'react-native';
 
-var Home=React.createClass({
+var Edit=React.createClass({
     render() {
         return (
             <View style={styles.container}>
                 <Text style={styles.welcome}>
-                    Welcome to Home!
+                    Welcome to Edit!
                 </Text>
             </View>
         );
@@ -43,4 +43,4 @@ const styles = StyleSheet.create({
     },
 });
 
-module.exports = Home;
+module.exports = Edit;
