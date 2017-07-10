@@ -16,7 +16,9 @@ import {
     Image,
     Dimensions,
     ActivityIndicator,
-    RefreshControl
+    RefreshControl,
+    AlertIOS,
+    Alert
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 // var Mock = require('mockjs')
@@ -29,18 +31,45 @@ var cachedResults ={
     items:[],
     total:0
 }
-
-var List=React.createClass({
+var Item=React.createClass({
     getInitialState(){
-        var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
-        return {
-            isRefreshing:false,
-            isLoadingTail:false,
-            dataSource: ds.cloneWithRows([]),  //当渲染的是空数组，listView需要定义enableEmptySections
-        };
+        var row = this.props.row
+
+        return{
+            up:row.voted,
+            row:row
+        }
     },
 
-    _renderRow(row){
+    _up(){
+        var that = this
+        var up = !this.state.up
+        var row = this.state.row
+        var url = config.header.api.base + config.header.api.up
+
+        var body = {
+            id:row._id,
+            up:up ? 'yes':'no',
+            accessToken:'abcde'
+        }
+        requset.post(url,body)
+            .then(function (data) {
+                if (data && data.success){
+                    that.setState({
+                        up:up
+                    })
+                }else{
+                    Platform.OS=='ios'? AlertIOS.alert('点赞失败，稍后重试！'):Alert.alert('点赞失败，稍后重试！')
+                }
+            })
+            .catch(function (err) {
+                console.log(err)
+                Platform.OS=='ios'? AlertIOS.alert('点赞失败，稍后重试！'):Alert.alert('点赞失败，稍后重试！')
+            })
+    },
+
+    render(){
+        var row = this.state.row
         return(
             <TouchableOpacity>
                 <View style={styles.item}>
@@ -49,20 +78,21 @@ var List=React.createClass({
                         source={{uri:row.thumb}}
                         style={styles.thumb}
                     >
-                    <Icon
-                        name='ios-play'
-                        size={28}
-                        style={styles.play}
-                    />
+                        <Icon
+                            name='ios-play'
+                            size={28}
+                            style={styles.play}
+                        />
                     </Image>
                     <View style={styles.itemFooter}>
                         <View style={styles.handleBox}>
                             <Icon
-                                name='ios-heart-outline'
+                                name={this.state.up?'ios-heart':'ios-heart-outline'}
                                 size={28}
-                                style={styles.up}
+                                style={[styles.up,this.state.up?null:styles.down]}
+                                onPress={this._up}
                             />
-                            <Text style={styles.handleText}>喜欢</Text>
+                            <Text style={styles.handleText} onPress={this._up}>喜欢</Text>
                         </View>
                         <View style={styles.handleBox}>
                             <Icon
@@ -76,6 +106,21 @@ var List=React.createClass({
                 </View>
             </TouchableOpacity>
         )
+    }
+})
+
+var List=React.createClass({
+    getInitialState(){
+        var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
+        return {
+            isRefreshing:false,
+            isLoadingTail:false,
+            dataSource: ds.cloneWithRows([]),  //当渲染的是空数组，listView需要定义enableEmptySections
+        };
+    },
+
+    _renderRow(row){
+        return <Item row={row}/>
     },
     // 组件安装完毕后调取数据
     componentDidMount(){
@@ -292,6 +337,10 @@ const styles = StyleSheet.create({
         color:'#333'
     },
     up:{
+        fontSize:22,
+        color:'red'
+    },
+    down:{
         fontSize:22,
         color:'#333'
     },
