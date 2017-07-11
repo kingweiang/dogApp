@@ -13,7 +13,9 @@ import {
     Dimensions,
     ActivityIndicator,
     TouchableOpacity,
-    Platform
+    Platform,
+    ScrollView,
+    Image
 } from 'react-native';
 
 var Video = require('react-native-video').default
@@ -125,9 +127,9 @@ var Detail=React.createClass({
                     </TouchableOpacity>
                     <Text style={styles.headerTitle} numberOflines={1}>视频详情页</Text>
                 </View>
-                <Text onPress={this._backToList} style={styles.welcome}>
-                    Welcome to Detail!{data._id}
-                </Text>
+                {/*<Text onPress={this._backToList} style={styles.welcome}>*/}
+                    {/*Welcome to Detail!{data._id}*/}
+                {/*</Text>*/}
                 <View style={styles.videoBox}>
                     <Video
                         ref="videoPlayer"
@@ -184,6 +186,20 @@ var Detail=React.createClass({
                         <View style={[styles.progressBar,{width:width*this.state.videoProgress}]}></View>
                     </View>
                 </View>
+                <ScrollView
+                    style={styles.scrollView}
+                    enableEmptySections={true}
+                    showsVerticalScrollIndicator={false}
+                    automaticallyAdjustContentInsets={false} // 当滚动视图放在一个导航条或者工具条后面的时候，iOS系统是否要自动调整内容的范围,如果你的ScrollView或ListView的头部出现莫名其妙的空白，尝试将此属性置为false
+                >
+                    <View style={styles.infoBox}>
+                        <Image style={styles.avatar} source={{uri:data.author.avatar}}/>
+                        <View style={styles.descBox}>
+                            <Text style={styles.nickname}>{data.author.nickname}</Text>
+                            <Text style={styles.title}>{data.title}</Text>
+                        </View>
+                    </View>
+                </ScrollView>
             </View>
         );
     }
@@ -196,25 +212,37 @@ const styles = StyleSheet.create({
         backgroundColor: '#F5FCFF',
     },
     header:{
-        flexDirection:'row',
-        justifyContent:'center',
-        alignItems:'center',
+        // flexDirection:'row',
+        // justifyContent:'center',
+        // alignItems:'center',
+        // width:width,
+        height:Platform.OS==='ios'?55:35,
+        // paddingTop:20,
+        // paddingLeft:10,
+        // paddingRight:10,
+        // borderBottomWidth:1,
+        // borderColor:'rgba(0,0,0,0.1)',
+        // backgroundColor:'#fff'
         width:width,
-        height:64,
-        paddingTop:20,
-        paddingLeft:10,
-        paddingRight:10,
-        borderBottomWidth:1,
-        borderColor:'rgba(0,0,0,0.1)',
-        backgroundColor:'#fff'
+        // paddingBottom:Platform.OS==='ios'?12:24,24
+        paddingTop:Platform.OS==='ios'?25:2,
+        backgroundColor:'#ee735c',
+        flexDirection:'row',
+        // justifyContent:'center',
+        // alignItems:'center'
     },
     backBox:{
+
       position:'absolute',
-        left:12,
-        top:32,
-        width:50,
+        width:Platform.OS==='ios'?45:50,
         flexDirection:'row',
-        alignItems:'center',
+        // alignItems:'center',
+        // backgroundColor:'blue',
+        paddingTop:Platform.OS==='ios'?25:8,
+        justifyContent:'center',
+        // alignItems:'center'
+        paddingLeft:10,
+
     },
     backIcon:{
         color:'#999',
@@ -222,11 +250,22 @@ const styles = StyleSheet.create({
         marginRight:5,
     },
     backText:{
-      color:'#999'
+        paddingTop:Platform.OS==='ios'?3:0,
+      color:'#999',
+        // textAlign:'center',
+        // fontWeight:Platform.OS==='ios'?'600':'10',
     },
     headerTitle:{
-      width:width-120,
-        textAlign:'center'
+        marginLeft:110,
+        width:150,
+        height:30,
+        textAlign:'center',
+        paddingTop:Platform.OS==='ios'?2:4,
+        // marginBottom:Platform.OS==='ios'?6:5,
+        color: '#fff',
+        fontSize:16,
+        fontWeight:'600',
+        // backgroundColor:'white'
     },
     videoBox: {
         width:width,
@@ -297,6 +336,30 @@ const styles = StyleSheet.create({
         textAlign:'center',
         color:'white',
         backgroundColor:'transparent'
+    },
+    infoBox:{
+        width:width,
+        flexDirection:'row',
+        justifyContent:'center',
+        marginTop:10,
+    },
+    avatar:{
+        width:60,
+        height:60,
+        marginRight:10,
+        marginLeft:10,
+        borderRadius:30,
+    },
+    descBox:{
+        flex:1,
+    },
+    nickname:{
+        fontSize:18,
+    },
+    title:{
+        marginTop:8,
+        fontSize:16,
+        color:'#666'
     }
 });
 
