@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
         right:16,
         width:40,
         height:40,
-        paddingTop:7,
+        paddingTop:6,
         paddingLeft:15,
         backgroundColor:'transparent',
         borderColor:'#fff',
