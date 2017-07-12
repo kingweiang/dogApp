@@ -319,12 +319,12 @@ const styles = StyleSheet.create({
     },
     thumb:{
         width:width,
-        height:width*0.56,
+        height:Platform.OS==='ios'?width*0.56:width*0.56-15,
         resizeMode:'cover'
     },
     title:{
         padding:10,
-        fontSize:18,
+        fontSize:Platform.OS==='ios'?18:15,
         color:'#333'
     },
     itemFooter:{

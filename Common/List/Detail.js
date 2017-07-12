@@ -15,18 +15,24 @@ import {
     TouchableOpacity,
     Platform,
     ScrollView,
-    Image
+    Image,
+    ListView,
+    RefreshControl
 } from 'react-native';
 
 var Video = require('react-native-video').default
 var width = Dimensions.get('window').width
+var config= require('../Main/config')
+var requset = require('../Main/request')
 import Icon from 'react-native-vector-icons/Ionicons';
 
 var Detail=React.createClass({
     getInitialState(){
         var data = this.props.data
+        var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
         return{
             data:data,
+            dataSource:ds.cloneWithRows([]),
             rete:1,
             muted:false,
             resizeMode:'contain',  // 包含
@@ -116,6 +122,45 @@ var Detail=React.createClass({
             })
         }
     },
+    componentDidMount(){
+        this._fetchData()
+    },
+
+    _fetchData(){
+        var that = this
+        var url = config.header.api.base+config.header.api.comment
+
+        requset.get(url,{
+            accessToken:'abcdef'
+        })
+        .then(function (data) {
+            if(data && data.success){
+                var comments = data.data
+                if(comments && comments.length > 0){
+                    that.setState({
+                        comments:comments,
+                        dataSource:that.state.dataSource.cloneWithRows(comments)
+                    })
+                }
+            }
+        })
+        .catch((error)=>{
+            console.log(error)
+        })
+        
+    },
+
+    _renderRow(row){
+        return(
+            <View key={row._id} style={styles.replyBox}>
+                <Image style={styles.replyAvatar} source={{uri:row.replyBy.avatar}}/>
+                <View style={styles.reply}>
+                    <Text style={styles.replyNickname}>{row.replyBy.nickname}</Text>
+                    <Text style={styles.replyContent}>{row.content}</Text>
+                </View>
+            </View>
+        )
+    },
     render() {
         var data = this.props.data
         return (
@@ -181,10 +226,11 @@ var Detail=React.createClass({
                             }
                         </TouchableOpacity>:null
                     }
-                    {/*进度条*/}
-                    <View style={styles.progressBox}>
-                        <View style={[styles.progressBar,{width:width*this.state.videoProgress}]}></View>
-                    </View>
+
+                </View>
+                {/*进度条*/}
+                <View style={styles.progressBox}>
+                    <View style={[styles.progressBar,{width:width*this.state.videoProgress}]}></View>
                 </View>
                 <ScrollView
                     style={styles.scrollView}
@@ -199,6 +245,13 @@ var Detail=React.createClass({
                             <Text style={styles.title}>{data.title}</Text>
                         </View>
                     </View>
+                    <ListView
+                        dataSource={this.state.dataSource}
+                        renderRow={this._renderRow}
+                        enableEmptySections={true}
+                        showsVerticalScrollIndicator={false}  //   隐藏滚动条
+                        automaticallyAdjustContentInsets={false}
+                    />
                 </ScrollView>
             </View>
         );
@@ -217,6 +270,7 @@ const styles = StyleSheet.create({
         // alignItems:'center',
         // width:width,
         height:Platform.OS==='ios'?55:35,
+        marginBottom:10,
         // paddingTop:20,
         // paddingLeft:10,
         // paddingRight:10,
@@ -268,13 +322,14 @@ const styles = StyleSheet.create({
         // backgroundColor:'white'
     },
     videoBox: {
+        // marginTop:Platform.OS==='ios'?13:0,
         width:width,
-        height:Platform.OS==='ios'?320:240,
+        height:Platform.OS==='ios'?231:210,
         backgroundColor:'#000'
     },
     video: {
         width:width,
-        height:Platform.OS==='ios'?320:240,
+        height:Platform.OS==='ios'?249:200,
         backgroundColor:'#000'
     },
     loading:{
@@ -286,6 +341,7 @@ const styles = StyleSheet.create({
         backgroundColor:'transparent'
     },
     progressBox:{
+        marginTop:Platform.OS==='ios'?13:0,
         width:width,
         height:5,
         backgroundColor:'#ccc'
@@ -297,7 +353,7 @@ const styles = StyleSheet.create({
     },
     playIcon:{
         position:'absolute',
-        top:140,
+        top:Platform.OS==='ios'?140:100,
         left:width/2-30,
         width:60,
         height:60,
@@ -316,7 +372,7 @@ const styles = StyleSheet.create({
     },
     resumeIcon:{
         position:'absolute',
-        top:140,
+        top:Platform.OS==='ios'?100:75,
         left:width/2-30,
         width:60,
         height:60,
@@ -354,12 +410,36 @@ const styles = StyleSheet.create({
         flex:1,
     },
     nickname:{
-        fontSize:18,
+        fontSize:Platform.OS==='ios'?18:15,
     },
     title:{
         marginTop:8,
-        fontSize:16,
+        fontSize:Platform.OS==='ios'?16:13,
         color:'#666'
+    },
+    replyBox:{
+        flexDirection:'row',
+        justifyContent:'flex-start',
+        marginTop:10
+    },
+    replyAvatar:{
+        width:40,
+        height:40,
+        marginRight:10,
+        marginLeft:10,
+        borderRadius:20,
+    },
+    replyNickname:{
+        color:'#666',
+
+    },
+    replyContent:{
+        marginTop:4,
+        fontSize:Platform.OS==='ios'?14:11,
+        color:'#666'
+    },
+    reply:{
+        flex:1
     }
 });
 
