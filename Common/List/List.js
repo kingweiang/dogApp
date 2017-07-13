@@ -180,7 +180,7 @@ var List=React.createClass({
                                 dataSource: that.state.dataSource.cloneWithRows(cachedResults.items)
                             })
                         }
-                    },100)
+                    },10)
                 }
             })
             .catch((error) => {
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize:16,
         textAlign:'center',
-        fontWeight:'600',
+        fontWeight:Platform.OS==='ios'?'600':'300',
     },
     item:{
         width:width,
