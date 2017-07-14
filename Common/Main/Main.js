@@ -12,7 +12,8 @@ import {
     View,
     Image,
     TabBarIOS,
-    Platform    // 用来判断安卓和IOS平台
+    Platform,    // 用来判断安卓和IOS平台
+    AsyncStorage
 } from 'react-native';
 
 import TabNavigator from 'react-native-tab-navigator';
@@ -22,18 +23,58 @@ import {Navigator} from 'react-native-deprecated-custom-components';
 
 var Edit = require('../Edit/Edit');
 var List =require('../List/List');
-var Account= require('../Account/login');
+var Account= require('../Account/Account');
+var Login= require('../Account/login');
 
 
 var Main = React.createClass({
     getInitialState(){
         return{
-            selectedTab:'more'
+            user:null,
+            selectedTab:'more',   // 默认选择的tarbar页面
+            logined:false   // 登录状态
         }
     },
 
+    componentDidMount(){
+      this._asyncAppStatus()
+    },
+    _asyncAppStatus(){
+        var that = this
+        AsyncStorage.getItem('user')
+            .then((data)=>{
+                var user
+                var newState = {}
 
+                if(data){
+                    user = JSON.parse(data)
+                }
+
+                if(user && user.accessToken){
+                    newState.user =user
+                    newState.logined = true
+                }else{
+                    newState.logined = false
+                }
+
+                that.setState(newState)
+            })
+    },
+    _afterLogin(user){
+        var that = this
+        user = JSON.stringify(user)
+      AsyncStorage.setItem('user',user)
+          .then(()=>{
+            that.setState({
+                logined:true,
+                user:user
+            })
+          })
+    },
     render: function() {
+        if(!this.state.logined){
+            return <Login afterLogin = {this._afterLogin}/>
+        }
         return (
             <TabNavigator>
                 {this.renderTabBarItem('视频','ios-videocam-outline','ios-videocam','videocam',List,'列表页面')}

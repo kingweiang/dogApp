@@ -82,8 +82,7 @@ var Login=React.createClass({
         request.post(Vurl,body)
             .then((data)=>{
                 if(data &&data.success){
-                    console.log('login OK')
-                    console.log(data)
+                    that.props.afterLogin(data.data)
                 }else{
                     Platform.OS=='ios'? AlertIOS.alert('获取验证码失败，请检查手机号码是否正确！'):Alert.alert('获取验证码失败，请检查手机号码是否正确！')
                 }
