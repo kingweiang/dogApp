@@ -321,6 +321,7 @@ var Detail=React.createClass({
                 <View  style={styles.comment}>
                     <TextInput
                         placeholder="我也要点评一下。。。"
+                        underlineColorAndroid="transparent"
                         style={styles.content}
                         multiline={true}   //多行
                         onFocus={this._focus}
@@ -431,6 +432,7 @@ var Detail=React.createClass({
                             <View  style={styles.comment}>
                                 <TextInput
                                     placeholder="我也要点评一下。。。"
+                                    underlineColorAndroid="transparent"
                                     style={styles.content}
                                     multiline={true}   //多行
                                     // onFocus={this._focus}
@@ -624,11 +626,11 @@ const styles = StyleSheet.create({
         marginTop:10,
     },
     avatar:{
-        width:60,
-        height:60,
+        width:Platform.OS==='ios'?56:50,
+        height:Platform.OS==='ios'?56:50,
         marginRight:10,
         marginLeft:10,
-        borderRadius:30,
+        borderRadius:Platform.OS==='ios'?28:25,
     },
     descBox:{
         flex:1,
@@ -647,11 +649,11 @@ const styles = StyleSheet.create({
         marginTop:10
     },
     replyAvatar:{
-        width:40,
-        height:40,
+        width:Platform.OS==='ios'?40:36,
+        height:Platform.OS==='ios'?40:36,
         marginRight:10,
         marginLeft:10,
-        borderRadius:20,
+        borderRadius:Platform.OS==='ios'?20:18,
     },
     replyNickname:{
         color:'#666',

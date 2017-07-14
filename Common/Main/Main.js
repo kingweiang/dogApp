@@ -22,13 +22,13 @@ import {Navigator} from 'react-native-deprecated-custom-components';
 
 var Edit = require('../Edit/Edit');
 var List =require('../List/List');
-var Account= require('../Account/Account');
+var Account= require('../Account/login');
 
 
 var Main = React.createClass({
     getInitialState(){
         return{
-            selectedTab:'videocam'
+            selectedTab:'more'
         }
     },
 
