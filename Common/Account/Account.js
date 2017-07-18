@@ -64,6 +64,12 @@ const options = {
 };
 
 function avater(id,type) {
+    if(id.indexOf('http')>-1){
+        return id
+    }
+    if(id.indexOf('data:image')>-1){
+        return id
+    }
     return CLOUDINARY.baseUri + '/'+ type + '/upload/' + id
 }
 
@@ -182,12 +188,13 @@ var Account=React.createClass({
 
             if(response && response.public_id){
                 var user = this.state.user
-                user.avatar = avater(response.public_id,'image')
+                user.avatar = response.public_id
                 that.setState({
                     avatarUploading:false,
                     avatarProgress:0,
                     user:user
                 })
+                that._asyncUser(true)
             }
         }
         // 图片上传进度
@@ -205,6 +212,33 @@ var Account=React.createClass({
         xhr.send(body)
     },
 
+    _asyncUser(isAvatar){
+        var that = this
+        var user = this.state.user
+
+        if(user && user.accessToken){
+            var url = config.header.api.base + config.header.api.update
+            // if(public_id){
+            //     user.avatar= user
+            // }
+            request.post(url,user)
+                .then((data)=>{
+                    if ( data&& data.success){
+                        var user = data.data
+
+                        if(isAvatar){
+                            Platform.OS=='ios'? AlertIOS.alert('头像更新成功！'):Alert.alert('头像更新成功！')
+                        }
+
+                        that.setState({
+                            user:user
+                        },function () {
+                            AsyncStorage.setItem('user',JSON.stringify(user))
+                        })
+                    }
+                })
+        }
+    },
     render: function(){
         var user = this.state.user
         return (
@@ -216,7 +250,7 @@ var Account=React.createClass({
                 {
                     user.avatar ?
                         <TouchableOpacity onPress={this._pickPhoto} style={styles.avatarContainer}>
-                            <Image source={{uri: user.avatar}} style={styles.avatarContainer}>
+                            <Image source={{uri: avater(user.avatar,'image')}} style={styles.avatarContainer}>
                                 <View style={styles.avatarBox}>
                                     {
                                         this.state.avatarUploading
@@ -227,11 +261,11 @@ var Account=React.createClass({
                                             progress ={this.state.avatarProgress}
                                         />
                                             :<Image
-                                            source={{uri: user.avatar}}
+                                            source={{uri: avater(user.avatar,'image')}}
                                             style={styles.avatar}
                                         />
                                     }
-                                    
+
                                 </View>
                                 <Text style={styles.avatarTip}>点击头像更换</Text>
                             </Image>
