@@ -9,43 +9,116 @@ import {
     AppRegistry,
     StyleSheet,
     Text,
-    View
+    View,
+    TouchableOpacity,
+    Dimensions,
+    Platform,
+    Image,
+    AsyncStorage,
 } from 'react-native';
+var ImagePicker = require('react-native-image-picker');
+// var ImagePicker= require('NativeModules').ImagePickerManager
 var {CountDownText} = require('react-native-sk-countdown');
+import Icon from 'react-native-vector-icons/Ionicons';
+var width = Dimensions.get('window').width
 
+const options = {
+    title: '选择图片',
+    cancelButtonTitle: '取消',
+    takePhotoButtonTitle: '拍照',
+    chooseFromLibraryButtonTitle: '图片库',
+    cameraType: 'back',
+    mediaType: 'photo',
+    videoQuality: 'high',
+    durationLimit: 10,
+    maxWidth: 600,
+    maxHeight: 600,
+    aspectX: 2,
+    aspectY: 1,
+    quality: 0.8,
+    angle: 0,
+    allowsEditing: false,
+    noData: false,
+    storageOptions: {
+        skipBackup: true,
+        path: 'images'
+    }
+};
 
 var Account=React.createClass({
+    getInitialState(){
+        var user = this.props.user || {}
+        return{
+            user:user
+        }
+    },
+    componentDidMount(){
+        var that = this
+        AsyncStorage.getItem('user')
+            .then((data)=>{
+                var user
+                if(data){
+                    user = JSON.parse(data)
+                }
+                if(user && user.accessToken){
+                    that.setState({
+                        user:user
+
+                    })
+                }
+
+            })
+    },
+    _pickPhoto(){
+
+        var that = this
+        ImagePicker.showImagePicker(options,(response) => {
+            if (response.didCancel) {
+                return
+            }
+
+            var avatarData = 'data:image/jpeg;base64,' + response.data
+            var user = that.state.user
+            user.avatar = avatarData
+            that.setState({
+                user:user
+            })
+        })
+    },
     render: function(){
+        var user = this.state.user
         return (
             <View style={styles.container}>
-                <Text style={styles.tip}>{'CountDown in seconds \n 以秒为单位的倒计时'}</Text>
-                <View style={styles.row}>
-                    <CountDownText
-                        style={styles.cd}
-                        countType='seconds' // 计时类型：seconds / date
-                        auto={true} // 自动开始
-                        afterEnd={() => {}} // 结束回调
-                        timeLeft={10} // 正向计时 时间起点为0秒
-                        step={-1} // 计时步长，以秒为单位，正数则为正计时，负数为倒计时
-                        startText='获取验证码' // 开始的文本
-                        endText='获取验证码' // 结束的文本
-                        intervalText={(sec) => sec + '秒重新获取'} // 定时的文本回调
-                    />
+                <View style={styles.toolbar}>
+                    <Text style={styles.toolbarTitle}>我的账户</Text>
                 </View>
-                <Text style={styles.tip}>{'CountDown in timestamp \n 以日期-时间为单位的倒计时'}</Text>
-                <View style={styles.row}>
-                    <CountDownText // 倒计时
-                        style={styles.cd}
-                        countType='date' // 计时类型：seconds / date
-                        auto={true} // 自动开始
-                        afterEnd={() => {}} // 结束回调
-                        timeLeft={10} // 正向计时 时间起点为0秒
-                        step={-1} // 计时步长，以秒为单位，正数则为正计时，负数为倒计时
-                        startText='' // 开始的文本
-                        endText='' // 结束的文本
-                        intervalText={(date, hour, min, sec) => date + '天' + hour + '时' + min + '分' + sec} // 定时的文本回调
-                    />
-                </View>
+                {console.log(user.avatar)}
+                {
+                    user.avatar
+                        ? <TouchableOpacity onPress={this._pickPhoto} style={styles.avatarContainer}>
+                        <Image soure={{uri: user.avatar}} style={styles.avatarContainer}>
+                            <View style={styles.avatarBox}>
+                                <Image
+                                    soure={{uri: user.avatar}}
+                                    style={styles.avatar}
+                                />
+                            </View>
+                            <Text style={styles.avatarTip}>点击头像更换</Text>
+                        </Image>
+                    </TouchableOpacity>
+                        : <TouchableOpacity onPress={this._pickPhoto} style={styles.avatarContainer}>
+                        <Text style={styles.avatarTip}>添加头像</Text>
+                        <View style={styles.avatarBox}>
+                            <Icon
+                                name = 'ios-cloud-upload-outline'
+                                style={styles.plusIcon}
+                            />
+                        </View>
+                    </TouchableOpacity>
+                }
+
+
+
             </View>
         )
     }
@@ -55,23 +128,57 @@ var Account=React.createClass({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'space-around',
-        alignItems: 'center',
         backgroundColor: '#F5FCFF',
     },
-    row: {
-        padding: 7,
-        backgroundColor: 'red',
-        borderRadius: 7,
+    toolbar: {
+        backgroundColor: '#ee735c',
+        flexDirection:'row',
+        paddingTop:Platform.OS==='ios'?25:10,
+        paddingBottom:Platform.OS==='ios'?8:4,
     },
-    tip: {
-        fontSize: 20,
+    toolbarTitle: {
+        flex:1,
+        fontSize: Platform.OS==='ios'?16:15,
+        color:'#fff',
+        textAlign:'center',
+        fontWeight:Platform.OS==='ios'?'500':'400',
     },
-    cd: {
-        textAlign: 'center',
-        color: 'white',
-        fontSize: 20,
+    avatarContainer: {
+        width:width,
+        height:140,
+        alignItems:'center',
+        justifyContent:'center',
+        backgroundColor:'#666',
     },
+    avatarTip:{
+        fontSize:16,
+        color:'#fff',
+        backgroundColor:'transparent',
+        justifyContent:'center'
+    },
+    avatar:{
+        marginBottom:15,
+        width:70,
+        height:70,
+        resizeMode:'cover',
+        borderWidth:1,
+        borderRadius:35,
+        backgroundColor:'#ee735c'
+    },
+    avatarBox:{
+        marginTop:15,
+        alignItems:'center',
+        justifyContent:'center',
+    },
+    plusIcon:{
+        padding:20,
+        paddingLeft:25,
+        paddingRight:25,
+        color:'#999',
+        fontSize:25,
+        backgroundColor:'#fff',
+        borderRadius:8,
+    }
 });
 
 module.exports = Account;
