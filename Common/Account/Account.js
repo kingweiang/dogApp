@@ -94,31 +94,28 @@ var Account=React.createClass({
                 </View>
                 {console.log(user.avatar)}
                 {
-                    user.avatar
-                        ? <TouchableOpacity onPress={this._pickPhoto} style={styles.avatarContainer}>
-                        <Image soure={{uri: user.avatar}} style={styles.avatarContainer}>
-                            <View style={styles.avatarBox}>
-                                <Image
-                                    soure={{uri: user.avatar}}
-                                    style={styles.avatar}
-                                />
-                            </View>
-                            <Text style={styles.avatarTip}>点击头像更换</Text>
-                        </Image>
-                    </TouchableOpacity>
+                    user.avatar ?
+                        <TouchableOpacity onPress={this._pickPhoto} style={styles.avatarContainer}>
+                            <Image source={{uri: user.avatar}} style={styles.avatarContainer}>
+                                <View style={styles.avatarBox}>
+                                    <Image
+                                        source={{uri: user.avatar}}
+                                        style={styles.avatar}
+                                    />
+                                </View>
+                                <Text style={styles.avatarTip}>点击头像更换</Text>
+                            </Image>
+                        </TouchableOpacity>
                         : <TouchableOpacity onPress={this._pickPhoto} style={styles.avatarContainer}>
                         <Text style={styles.avatarTip}>添加头像</Text>
                         <View style={styles.avatarBox}>
                             <Icon
-                                name = 'ios-cloud-upload-outline'
+                                name='ios-cloud-upload-outline'
                                 style={styles.plusIcon}
                             />
                         </View>
                     </TouchableOpacity>
                 }
-
-
-
             </View>
         )
     }
@@ -144,26 +141,28 @@ const styles = StyleSheet.create({
         fontWeight:Platform.OS==='ios'?'500':'400',
     },
     avatarContainer: {
+        marginTop:1,
         width:width,
-        height:140,
+        height:Platform.OS==='ios'?140:125,
         alignItems:'center',
         justifyContent:'center',
         backgroundColor:'#666',
     },
     avatarTip:{
-        fontSize:16,
+        fontSize:Platform.OS==='ios'?15:13,
         color:'#fff',
         backgroundColor:'transparent',
         justifyContent:'center'
     },
     avatar:{
-        marginBottom:15,
-        width:70,
-        height:70,
+        marginBottom:Platform.OS==='ios'?15:12,
+        width: Platform.OS==='ios'?70:64,
+        height:Platform.OS==='ios'?70:64,
         resizeMode:'cover',
         borderWidth:1,
-        borderRadius:35,
-        backgroundColor:'#ee735c'
+        borderColor:'#fff',
+        borderRadius:Platform.OS==='ios'?35:32,
+        backgroundColor: Platform.OS==='ios'?'#fff':'transparent',
     },
     avatarBox:{
         marginTop:15,
