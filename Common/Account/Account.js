@@ -15,13 +15,30 @@ import {
     Platform,
     Image,
     AsyncStorage,
+    Alert,
+    AlertIOS,
 } from 'react-native';
 var ImagePicker = require('react-native-image-picker');
+var sha1 = require('sha1');
 // var ImagePicker= require('NativeModules').ImagePickerManager
 var {CountDownText} = require('react-native-sk-countdown');
 import Icon from 'react-native-vector-icons/Ionicons';
 var width = Dimensions.get('window').width
+var config = require('../Main/config')
+var request = require('../Main/request')
 
+//  图床配置参数cloudinary
+var CLOUDINARY = {
+    cloud_name: 'duy4kia4y',
+    api_key: '665833873512597',
+    api_secret: '9Gtvmhl0crBgo1r00Ha3uuVAO8Y',
+    baseUri:	'http://res.cloudinary.com/duy4kia4y',
+    image: 'https://api.cloudinary.com/v1_1/duy4kia4y/image/upload',
+    video: 'https://api.cloudinary.com/v1_1/duy4kia4y/video/upload',
+    audio: 'https://api.cloudinary.com/v1_1/duy4kia4y/raw/upload'
+}
+
+// 上传头像组件配置参数image-picker
 const options = {
     title: '选择头像图片',
     cancelButtonTitle: '取消',
@@ -45,6 +62,10 @@ const options = {
     }
 };
 
+function avater(id,type) {
+    return CLOUDINARY.baseUri + '/'+ type + '/upload/' + id
+}
+
 var Account=React.createClass({
     getInitialState(){
         var user = this.props.user || {}
@@ -60,6 +81,10 @@ var Account=React.createClass({
                 if(data){
                     user = JSON.parse(data)
                 }
+
+                // user.avatar = ''
+                // AsyncStorage.setItem('user',JSON.stringify(user))
+
                 if(user && user.accessToken){
                     that.setState({
                         user:user
@@ -77,13 +102,89 @@ var Account=React.createClass({
             }
 
             var avatarData = 'data:image/jpeg;base64,' + response.data
-            var user = that.state.user
-            user.avatar = avatarData
-            that.setState({
-                user:user
+            // var user = that.state.user
+            // user.avatar = avatarData
+            // that.setState({
+            //     user:user
+            // })
+
+            var timestamp = Date.now()   // 当前时间戳
+            var tags = 'app,avatar'
+            var folder = 'avatar'
+            var sigantureURL= config.header.api.base+ config.header.api.signature
+            var accessToken = this.state.user.accessToken
+
+            request.post(sigantureURL,{
+                accessToken:accessToken,
+                timestamp:timestamp,
+                type:'avatar'
             })
+                .catch((err)=>{
+                    console.log(err)
+                })
+                .then((data)=>{
+                    console.log(data)
+                    if(data){
+                        var signature = 'folder='+ folder + '&tags='+ tags +'&timestamp='+ timestamp + CLOUDINARY.api_secret
+
+                        signature = sha1(signature)
+
+                        var body = new FormData()
+                        console.log(body)
+
+                        body.append('folder',folder)
+                        body.append('signature',signature)
+                        body.append('tags',tags)
+                        body.append('timestamp',timestamp)
+                        body.append('api_key',CLOUDINARY.api_key)
+                        body.append('resource_type','image')
+                        body.append('file',avatarData)
+
+                        that._upload(body)
+                    }
+                })
         })
     },
+    //  图床上传方法
+    _upload(body){
+        var that = this
+        var xhr = new XMLHttpRequest()
+        var url = CLOUDINARY.image
+
+        console.log(body)
+        xhr.open('POST',url)
+        xhr.onload=()=>{
+            if(xhr.status !== 200){
+                Platform.OS=='ios'? AlertIOS.alert('请求失败！'):Alert.alert('请求失败！')
+                console.log(xhr.responseText)
+                return
+            }
+            if (!xhr.responseText){
+                Platform.OS=='ios'? AlertIOS.alert('请求失败！'):Alert.alert('请求失败！')
+                return
+            }
+            var response
+
+            try{
+                response = JSON.parse(xhr.response)
+            }
+            catch (e){
+                console.log(e)
+                console.log('parse fails')
+            }
+
+            if(response && response.public_id){
+                var user = this.state.user
+                user.avatar = avater(response.public_id,'image')
+                that.setState({
+                    user:user
+                })
+            }
+        }
+
+        xhr.send(body)
+    },
+
     render: function(){
         var user = this.state.user
         return (

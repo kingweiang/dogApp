@@ -14,6 +14,7 @@ module.exports={
             comment:'api/comments',
             signup:'api/u/signup',
             verify:'api/u/verify',
+            signature:'api/signature',
         }
     }
 }
