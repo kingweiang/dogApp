@@ -23,10 +23,10 @@ import Icon from 'react-native-vector-icons/Ionicons';
 var width = Dimensions.get('window').width
 
 const options = {
-    title: '选择图片',
+    title: '选择头像图片',
     cancelButtonTitle: '取消',
     takePhotoButtonTitle: '拍照',
-    chooseFromLibraryButtonTitle: '图片库',
+    chooseFromLibraryButtonTitle: '选择相册',
     cameraType: 'back',
     mediaType: 'photo',
     videoQuality: 'high',
@@ -37,7 +37,7 @@ const options = {
     aspectY: 1,
     quality: 0.8,
     angle: 0,
-    allowsEditing: false,
+    allowsEditing: true,
     noData: false,
     storageOptions: {
         skipBackup: true,
@@ -70,7 +70,6 @@ var Account=React.createClass({
             })
     },
     _pickPhoto(){
-
         var that = this
         ImagePicker.showImagePicker(options,(response) => {
             if (response.didCancel) {
