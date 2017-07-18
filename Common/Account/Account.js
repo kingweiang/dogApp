@@ -26,6 +26,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 var width = Dimensions.get('window').width
 var config = require('../Main/config')
 var request = require('../Main/request')
+import * as Progress from 'react-native-progress';
 
 //  图床配置参数cloudinary
 var CLOUDINARY = {
@@ -70,7 +71,9 @@ var Account=React.createClass({
     getInitialState(){
         var user = this.props.user || {}
         return{
-            user:user
+            user:user,
+            avatarProgress:0,
+            avatarUploading:false,
         }
     },
     componentDidMount(){
@@ -152,6 +155,10 @@ var Account=React.createClass({
         var url = CLOUDINARY.image
 
         console.log(body)
+        this.setState({
+            avatarUploading:true,
+            avatarProgress:0,
+        })
         xhr.open('POST',url)
         xhr.onload=()=>{
             if(xhr.status !== 200){
@@ -177,11 +184,24 @@ var Account=React.createClass({
                 var user = this.state.user
                 user.avatar = avater(response.public_id,'image')
                 that.setState({
+                    avatarUploading:false,
+                    avatarProgress:0,
                     user:user
                 })
             }
         }
+        // 图片上传进度
+        if (xhr.upload){
+            xhr.upload.onprogress = (event)=>{
+                if(event.lengthComputable){
+                    var percent = Number((event.loaded /event.total).toFixed(2))
 
+                    that.setState({
+                        avatarProgress:percent
+                    })
+                }
+            }
+        }
         xhr.send(body)
     },
 
@@ -198,10 +218,20 @@ var Account=React.createClass({
                         <TouchableOpacity onPress={this._pickPhoto} style={styles.avatarContainer}>
                             <Image source={{uri: user.avatar}} style={styles.avatarContainer}>
                                 <View style={styles.avatarBox}>
-                                    <Image
-                                        source={{uri: user.avatar}}
-                                        style={styles.avatar}
-                                    />
+                                    {
+                                        this.state.avatarUploading
+                                            ?<Progress.Circle
+                                            showsText={true}
+                                            color={'#ee735c'}
+                                            size={75}
+                                            progress ={this.state.avatarProgress}
+                                        />
+                                            :<Image
+                                            source={{uri: user.avatar}}
+                                            style={styles.avatar}
+                                        />
+                                    }
+                                    
                                 </View>
                                 <Text style={styles.avatarTip}>点击头像更换</Text>
                             </Image>
@@ -209,10 +239,19 @@ var Account=React.createClass({
                         : <TouchableOpacity onPress={this._pickPhoto} style={styles.avatarContainer}>
                         <Text style={styles.avatarTip}>添加头像</Text>
                         <View style={styles.avatarBox}>
-                            <Icon
-                                name='ios-cloud-upload-outline'
-                                style={styles.plusIcon}
-                            />
+                            {
+                                this.state.avatarUploading
+                                    ?<Progress.Circle
+                                    showsText={true}
+                                    color={'#ee735c'}
+                                    size={75}
+                                    progress ={this.state.avatarProgress}
+                                     />
+                                :<Icon
+                                    name='ios-cloud-upload-outline'
+                                    style={styles.plusIcon}
+                                />
+                            }
                         </View>
                     </TouchableOpacity>
                 }
